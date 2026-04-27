@@ -1,14 +1,29 @@
 const mongoose = require("mongoose");
 
+// Connection state ko track karne ke liye variable
+let isConnected = false;
+
 const connectDB = async () => {
-  const { mongodb_username, mongodb_password } = process.env;
-  const uri = `mongodb+srv://${mongodb_username}:${mongodb_password}@cluster0.luinnfe.mongodb.net/?appName=Cluster0`;
+  const { MongoDB_UserName, MongoDB_Password } = process.env;
+  const uri = `mongodb+srv://${MongoDB_UserName}:${MongoDB_Password}@cluster0.luinnfe.mongodb.net/?appName=Cluster0`;
+
+  // Agar pehle se connected hai, toh dubara connect mat karo
+  if (isConnected) {
+    console.log("Using existing MongoDB connection");
+    return;
+  }
+
   try {
-    await mongoose.connect(uri);
+    const db = await mongoose.connect(uri);
+
+    // Connection state update karein (1 ka matlab connected hota hai)
+    isConnected = db.connections[0].readyState;
+
     console.log("MongoDB connected successfully");
   } catch (error) {
     console.error("MongoDB connection error:", error);
-    process.exit(1);
+    // Serverless mein process.exit(1) ki jagah error throw karna behtar hai
+    throw error;
   }
 };
 
