@@ -9,7 +9,13 @@ const { connectDB } = require("./config/db");
 
 const app = express();
 
-app.use(cors());
+app.use(
+  cors({
+    origin: ["hasnain-task-manager.vercel.app"],
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true,
+  }),
+);
 app.use(express.json());
 connectDB();
 // Routes
