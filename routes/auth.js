@@ -269,7 +269,7 @@ router.post("/reset-password", async (req, res) => {
     user.resetToken = resetToken;
     await user.save();
 
-    const resetLink = `http://localhost:5173/auth/reset-password/${resetToken}`;
+    const resetLink = `https://hasnain-task-manager.vercel.app/auth/reset-password/${resetToken}`;
 
     await sendEmail(user.email, "Password Reset Link", resetLink);
 
