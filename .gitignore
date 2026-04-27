@@ -1,0 +1,32 @@
+# Dependency folders (Ye bohat heavy hoti hain aur download ho jati hain)
+node_modules/
+dist/
+build/
+
+# Environment variables (Bohat zaroori: isme aapki keys aur passwords hote hain)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Operating System files
+.DS_Store
+Thumbs.db
+
+# IDE / Editor files
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Uploads folder (Agar aap images locally save kar rahe hain)
+uploads/
