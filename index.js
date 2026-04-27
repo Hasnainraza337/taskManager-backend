@@ -11,7 +11,7 @@ const app = express();
 
 app.use(
   cors({
-    origin: ["hasnain-task-manager.vercel.app"],
+    origin: ["https://hasnain-task-manager.vercel.app"],
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   }),
