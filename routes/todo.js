@@ -38,12 +38,6 @@ router.post(
       const { title, dueDate, description } = req.body;
       const { uid } = req;
 
-      if (title.trim().length < 3) {
-        return res
-          .status(401)
-          .json({ message: "Title must be at least 3 characters." });
-      }
-
       const newTodo = {
         id:
           Math.random().toString(36).slice(2) +
