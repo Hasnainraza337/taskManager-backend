@@ -130,33 +130,72 @@ router.delete("/deleteTodo/:id", verifyToken, async (req, res) => {
 });
 
 // Update ToDo Api route
-router.patch("/updateTodo/:id", verifyToken, async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { uid } = req;
-    const { title, dueDate, description } = req.body;
-    const newTodo = { title, dueDate, description };
-    const updateTodo = await Todos.findOneAndUpdate({ id }, newTodo, {
-      returnDocument: "after",
-    });
-    if (!updateTodo) {
-      return res
-        .status(404)
-        .json({ message: "Todo not found or unauthorized" });
+router.patch(
+  "/updateTodo/:id",
+  upload.single("image"),
+  verifyToken,
+  async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { uid } = req;
+      const { title, dueDate, description } = req.body;
+
+      let todo = await Todos.findOne({ id });
+      if (!todo) return res.status(404).json({ message: "Todo not found" });
+
+      let imageURL = todo.imageURL;
+      let imagePublicId = todo.imagePublicId;
+
+      if (req.file) {
+        if (imagePublicId) {
+          await cloudinary.uploader.destroy(imagePublicId);
+        }
+
+        // 2. Nayi image upload karein
+        await new Promise((resolve, reject) => {
+          const uploadStream = cloudinary.uploader.upload_stream(
+            { folder: "images/" },
+            (error, result) => {
+              if (error) return reject(error);
+              imageURL = result.secure_url;
+              imagePublicId = result.public_id;
+              resolve();
+            },
+          );
+          uploadStream.end(req.file.buffer);
+        });
+      }
+
+      const updatedData = {
+        title,
+        dueDate,
+        description,
+        imageURL,
+        imagePublicId,
+      };
+
+      const updateTodo = await Todos.findOneAndUpdate({ id }, updatedData, {
+        new: true,
+      });
+
+      // Notification logic
+      const newNotification = new Notification({
+        recipient: uid,
+        message: `Task Updated: "${updateTodo.title}" was modified successfully.`,
+        type: "task",
+      });
+      await newNotification.save();
+
+      res
+        .status(200)
+        .json({ message: "Todo Updated Successfully", todo: updateTodo });
+    } catch (error) {
+      res
+        .status(500)
+        .json({ message: error.message || "Internal Server Error" });
     }
-    const newNotification = new Notification({
-      recipient: uid,
-      message: `Task Updated: "${updateTodo.title}" was modified successfully.`,
-      type: "task",
-    });
-    await newNotification.save();
-    res
-      .status(200)
-      .json({ message: "Todo Updated Successfully", todo: updateTodo });
-  } catch (error) {
-    res.status(500).json({ message: error.message || "Internal Server Error" });
-  }
-});
+  },
+);
 
 // Backend Route Update
 router.get("/recentTodos", verifyToken, async (req, res) => {
